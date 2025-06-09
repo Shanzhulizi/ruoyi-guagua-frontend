@@ -1,0 +1,393 @@
+.home {
+  font-family: Arial, sans-serif;
+  background: #f5f5f5;
+  padding: 0 80px;
+  /* 只留左右空隙 */
+  box-sizing: border-box;
+}
+
+
+
+.top-fields {
+  position: relative;
+  background: transparent;
+  padding: 10px;
+  display: flex;
+  justify-content: space-around;
+  font-size: 14px;
+  border-bottom: 1px solid #ddd;
+  z-index: 1;
+}
+
+
+.top-fields::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -80px;
+  /* 抵消 .home 的 padding-left */
+  width: calc(100% + 160px);
+  /* 扩大宽度以覆盖两边空隙 */
+  height: 100%;
+  background-color: white;
+  z-index: -1;
+}
+
+
+
+.left-link a {
+  color: #333;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.right-links {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.right-links a {
+  color: #333;
+  text-decoration: none;
+}
+
+.divider {
+  color: #ccc;
+}
+
+.search-bar {
+  background: transparent;
+  /* 背景无色 */
+  display: flex;
+  align-items: center;
+  padding: 30px 40px;
+  /* 加高 */
+  border-bottom: 1px solid #ddd;
+  height: 150px;
+  /* 高度加大 */
+  box-sizing: border-box;
+}
+
+.logo {
+  flex: 1;
+  /* 1/5 */
+  display: flex;
+  align-items: center;
+}
+
+.logo img {
+  height: 140px;
+  object-fit: contain;
+
+}
+
+.logo-text {
+  font-size: 64px;
+  font-weight: bold;
+  color: #e2231a;
+  font-family: 'Arial', sans-serif;
+
+}
+
+.search-input-group {
+  flex: 3;
+  /* 占 3/5 */
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+  height: 100%;
+  /* 保证垂直撑满 .search-bar */
+}
+
+.search-input-group input {
+  flex: 1;
+  padding: 16px 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 18px;
+  height: 60px;
+  box-sizing: border-box;
+}
+
+.search-input-group button {
+  background-color: #e2231a;
+  color: white;
+  border: none;
+  padding: 0 24px;
+  border-radius: 8px;
+  font-size: 18px;
+  height: 60px;
+  cursor: pointer;
+}
+
+.search-right {
+  flex: 1;
+  /* 占 1/5，空白 */
+}
+
+.main-section {
+  display: flex;
+  padding: 20px;
+  background: #fff;
+  gap: 20px;
+  min-height: 450px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* 左右各占 1/6 */
+/* .left-categories, */
+.right-user {
+  flex: 1;
+  background: #fafafa;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.03);
+  overflow-y: auto;
+  /* 内容多时可滚动 */
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+}
+
+.left-categories {
+  flex: 1;
+  max-height: 450px;
+  overflow-y: auto;
+  background: #fafafa;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.03);
+}
+
+.category-row {
+  display: flex;
+  flex-wrap: wrap;
+  /* 多余自动换行 */
+  margin-bottom: 12px;
+  align-items: center;
+}
+
+.category-item {
+  padding: 8px 12px;
+  margin-right: 10px;
+  background-color: #f5f5f5;
+  border-radius: 6px;
+  font-size: 10px;
+  color: #333;
+  white-space: nowrap;
+}
+
+.category {
+  padding: 6px 0;
+  border-bottom: 1px dashed #ccc;
+  font-size: 20px;
+  color: #333;
+  white-space: nowrap;
+}
+
+/* 中间 2x2 模块区域占 4/6 */
+.center-banner {
+  flex: 4;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 20px;
+}
+
+/* 单个模块 */
+.grid-module {
+  background: linear-gradient(to right, #fff0f0, #ffeaea);
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 500;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* 鼠标悬浮交互效果 */
+.grid-module:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+/* 用户区域细化 */
+.user-info {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.user-links {
+  font-size: 14px;
+  color: #888;
+}
+
+
+
+.recommend-section {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr); /* 每行6个 */
+  gap: 20px;
+  padding: 10px;
+}
+
+.product-card {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 0 6px rgb(0 0 0 / 0.1);
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-image {
+  width: 100%;
+  height: 180px; /* 固定高度 */
+  object-fit: cover;
+}
+
+.product-info {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  color: #444;
+}
+
+.product-name {
+  font-weight: 600;
+  font-size: 16px;
+  color: #222;
+}
+
+.product-brand,
+.product-desc,
+.product-stock,
+.product-sales {
+  color: #666;
+}
+
+.product-price {
+  margin-top: auto;
+  font-weight: 700;
+  font-size: 16px;
+  color: #e33;
+}
+
+.loading,
+.finished {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 16px;
+  color: #888;
+}
+
+.load-trigger {
+  height: 1px;
+}
+
+
+
+
+
+
+
+
+
+
+.user-card {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
+}
+
+.user-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  margin-right: 16px;
+  object-fit: cover;
+  border: 1px solid #ddd;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.user-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  padding: 6px 14px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn.secondary {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.btn.secondary:hover {
+  background-color: #e0e0e0;
+}
+
+.btn.danger {
+  background-color: #fbeaea;
+  color: #d33;
+}
+
+.btn.danger:hover {
+  background-color: #f5dcdc;
+}
+
+.user-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.action-item {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+  font-size: 14px;
+  color: #555;
+  border: 1px solid #eee;
+  transition: background-color 0.2s;
+}
+
+.action-item:hover {
+  background-color: #f0f0f0;
+}
