@@ -3,12 +3,13 @@ import Login from "../views/Login.vue";
 import Home from "../views/Home.vue";
 import Register from "../views/Register.vue";
 import component from "element-plus/es/components/tree-select/src/tree-select-option.mjs";
-
+import Seckill from "../views/Seckill.vue";
 const routes = [
   { path: "/", redirect: "/login" },
   { path: "/login", component: Login },
   { path: "/home", component: Home },
   { path: "/register", component: Register },
+  {path: "/seckill" ,component: Seckill},
 ];
 
 const router = createRouter({

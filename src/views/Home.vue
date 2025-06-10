@@ -41,7 +41,30 @@
       </div>
       <!-- 中间田字格 -->
       <div class="center-banner">
-        <div class="grid-module">🔥 秒杀专区</div>
+                  <!-- 秒杀专区 -->
+        <div class="grid-module seckill-section"  @click="goToSeckill">
+            <!-- 标题行 -->
+            <div class="seckill-header">
+              <h2>🔥 秒杀专区</h2>
+              <p class="seckill-subtitle">限时秒杀 不容错过</p>
+            </div>
+
+            <!-- 商品展示行 -->
+            <div class="seckill-products">
+              <div class="seckill-item" v-for="item in hotSeckillProducts" :key="item.id">
+                <img :src="item.image" alt="商品图" class="seckill-img" />
+                <div class="seckill-name">{{ item.name }}</div>
+                <div class="seckill-price">
+                  <span class="original-price">￥{{ item.originalPrice }}</span>
+                  <span class="seckill-now">￥{{ item.seckillPrice }}</span>
+                </div>
+              </div>
+            </div>
+       
+
+        </div>
+
+
         <div class="grid-module">🛒 国补促销</div>
         <div class="grid-module">✨ 新品推荐</div>
         <div class="grid-module">💰 9.9 包邮</div>
@@ -49,29 +72,29 @@
 
       <!-- 右侧用户 -->
       <div class="right-user">
-  <div class="user-card">
-    <div class="user-header">
-      <img class="avatar" src="https://i.pravatar.cc/100?img=3" alt="头像" />
-      <div class="user-info">
-        <div class="user-name">你好，张三</div>
-        <div class="user-actions">
-          <button class="btn secondary" @click="switchAccount">切换账号</button>
-          <button class="btn danger" @click="logout">退出</button>
+        <div class="user-card">
+          <div class="user-header">
+            <img class="avatar" :src="user.avatar || defaultAvatar" alt="头像" />
+            <div class="user-info">
+              <div class="user-name">你好，{{ user.nickname || user.username || '用户' }}</div>
+              <div class="user-actions">
+                <button class="btn secondary" @click="switchAccount">切换账号</button>
+                <button class="btn danger" @click="logout">退出</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="user-quick-actions">
+            <div class="action-item">待付款</div>
+            <div class="action-item">待收货</div>
+            <div class="action-item">待评价</div>
+            <div class="action-item">售后</div>
+            <div class="action-item">浏览记录</div>
+            <div class="action-item">商品收藏</div>
+            <div class="action-item">关注店铺</div>
+          </div>
         </div>
       </div>
-    </div>
-
-    <div class="user-quick-actions">
-      <div class="action-item">待付款</div>
-      <div class="action-item">待收货</div>
-      <div class="action-item">待评价</div>
-      <div class="action-item">售后</div>
-      <div class="action-item">浏览记录</div>
-      <div class="action-item">商品收藏</div>
-      <div class="action-item">关注店铺</div>
-    </div>
-  </div>
-</div>
 
 
 
@@ -102,10 +125,16 @@
 </template>
 
 <script setup>
+
+
 import '../assets/product.css'
 // import { ref, onMounted } from 'vue';
 import { ref, onMounted } from 'vue'
 import logoImg from '../assets/guagua.jpg'; // 请将 logo.png 替换成你的实际图片路径
+
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 
 const search = ref('');
@@ -118,6 +147,10 @@ const doSearch = () => {
 // 左侧商品种类
 // import { ref, onMounted } from 'vue'
 import axios from 'axios'
+
+
+
+
 
 const groupedCategories = ref({})
 
@@ -142,6 +175,39 @@ const fetchCategories = async () => {
 }
 
 onMounted(fetchCategories)
+
+
+
+
+
+const user = ref({})
+const defaultAvatar = 'https://i.pravatar.cc/100?img=3'
+
+onMounted(() => {
+  const storedUser = localStorage.getItem('user')
+  if (storedUser) {
+    user.value = JSON.parse(storedUser)
+  }
+})
+
+const switchAccount = () => {
+  alert("没实现呢宝贝")
+  // // 切换账号逻辑
+  // localStorage.removeItem('token')
+  // localStorage.removeItem('user')
+  // location.href = '/login'
+}
+
+const logout = () => {
+  // 退出登录逻辑
+  localStorage.removeItem('token')
+  localStorage.removeItem('user')
+  location.href = '/login'
+}
+
+
+
+
 
 
 
@@ -209,6 +275,38 @@ onMounted(() => {
 
   loadProducts()
 })
+
+
+
+const hotSeckillProducts = ref([])
+
+async function fetchHotSeckillProducts() {
+  try {
+    // 假设后台接口地址，比如 /api/seckill-products/hot
+    const res = await axios.get('/api/seckill/seckill/hot')
+    // 返回的数据结构假设是数组，直接赋值
+    hotSeckillProducts.value = res.data
+  } catch (error) {
+    console.error('获取秒杀热门商品失败:', error)
+  }
+}
+
+// 页面加载时调用
+onMounted(() => {
+  fetchHotSeckillProducts()
+})
+
+
+
+
+
+
+
+
+function goToSeckill() {
+  router.push('/seckill')
+}
+
 </script>
 
 <style scoped></style>
