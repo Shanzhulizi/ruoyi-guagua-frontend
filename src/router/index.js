@@ -4,12 +4,14 @@ import Home from "../views/Home.vue";
 import Register from "../views/Register.vue";
 import component from "element-plus/es/components/tree-select/src/tree-select-option.mjs";
 import Seckill from "../views/Seckill.vue";
+import SeckillDetail from "../views/SeckillDetail.vue";
 const routes = [
   { path: "/", redirect: "/login" },
   { path: "/login", component: Login },
   { path: "/home", component: Home },
   { path: "/register", component: Register },
-  {path: "/seckill" ,component: Seckill},
+  { path: "/seckill", component: Seckill },
+  { path: "/seckill/detail/:id", component: SeckillDetail },
 ];
 
 const router = createRouter({
@@ -17,11 +19,7 @@ const router = createRouter({
   routes,
 });
 
-const whiteList = [
-  "/login",
-  "/register",
-  "/forgot-password",
-];
+const whiteList = ["/login", "/register", "/forgot-password"];
 // 路由守卫
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem("token");
@@ -32,7 +30,7 @@ router.beforeEach((to, from, next) => {
   }
 
   // 如果路径是 /user/user 开头的，且不在白名单中
-  if ( !token) {
+  if (!token) {
     return next("/login");
   }
 
