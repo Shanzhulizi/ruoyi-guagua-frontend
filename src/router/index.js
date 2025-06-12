@@ -12,6 +12,10 @@ const routes = [
   { path: "/register", component: Register },
   { path: "/seckill", component: Seckill },
   { path: "/seckill/detail/:id", component: SeckillDetail },
+ {
+    path: "/:pathMatch(.*)*",
+    redirect: "/login" // 所有未定义的页面都重定向到登录页
+  }
 ];
 
 const router = createRouter({
@@ -29,7 +33,7 @@ router.beforeEach((to, from, next) => {
     return next();
   }
 
-  // 如果路径是 /user/user 开头的，且不在白名单中
+  // 如果没有 token，跳转到登录页
   if (!token) {
     return next("/login");
   }
