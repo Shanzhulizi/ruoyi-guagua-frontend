@@ -32,35 +32,45 @@
     <!-- 三分栏布局：左-分类，中-秒杀/国补，右-个人模块 -->
     <div class="main-section">
 
-      <div class="left-categories">
+      <!-- <div class="left-categories">
         <div v-for="(children, parentId) in groupedCategories" :key="parentId" class="category-row">
           <div class="category-item" v-for="cat in children" :key="cat.id">
             {{ cat.name }}
           </div>
         </div>
+      </div> -->
+      <div class="left-categories">
+        <div v-for="(children, parentId) in groupedCategories" :key="parentId" class="category-row">
+          <div class="category-item" v-for="cat in children" :key="cat.id" @click="goToCategory(cat.id)"
+            style="cursor: pointer">
+            {{ cat.name }}
+          </div>
+        </div>
       </div>
+
+
       <!-- 中间田字格 -->
       <div class="center-banner">
-                  <!-- 秒杀专区 -->
-        <div class="grid-module seckill-section"  @click="goToSeckill">
-            <!-- 标题行 -->
-            <div class="seckill-header">
-              <h2>🔥 秒杀专区</h2>
-              <p class="seckill-subtitle">限时秒杀 不容错过</p>
-            </div>
+        <!-- 秒杀专区 -->
+        <div class="grid-module seckill-section" @click="goToSeckill">
+          <!-- 标题行 -->
+          <div class="seckill-header">
+            <h2>🔥 秒杀专区</h2>
+            <p class="seckill-subtitle">限时秒杀 不容错过</p>
+          </div>
 
-            <!-- 商品展示行 -->
-            <div class="seckill-products">
-              <div class="seckill-item" v-for="item in hotSeckillProducts" :key="item.id">
-                <img :src="item.image" alt="商品图" class="seckill-img" />
-                <div class="seckill-name">{{ item.name }}</div>
-                <div class="seckill-price">
-                  <span class="original-price">￥{{ item.originalPrice }}</span>
-                  <span class="seckill-now">￥{{ item.seckillPrice }}</span>
-                </div>
+          <!-- 商品展示行 -->
+          <div class="seckill-products">
+            <div class="seckill-item" v-for="item in hotSeckillProducts" :key="item.id">
+              <img :src="item.image" alt="商品图" class="seckill-img" />
+              <div class="seckill-name">{{ item.name }}</div>
+              <div class="seckill-price">
+                <span class="original-price">￥{{ item.originalPrice }}</span>
+                <span class="seckill-now">￥{{ item.seckillPrice }}</span>
               </div>
             </div>
-       
+          </div>
+
 
         </div>
 
@@ -102,9 +112,10 @@
 
 
 
-    <div class="recommend-section">
+    <!-- <div class="recommend-section">
       <div class="product-card" v-for="item in products" :key="item.id">
-        <img :src="item.imageUrl" alt="商品图片" class="product-image" />
+        <img :src="item.image" alt="商品图片" class="product-image" />
+       
         <div class="product-info">
           <div class="product-name">{{ item.name }}</div>
           <div class="product-brand">品牌：{{ item.brand || '未知品牌' }}</div>
@@ -117,7 +128,31 @@
       <div v-if="loading" class="loading">加载中...</div>
       <div v-if="finished" class="finished">已加载全部商品</div>
       <div ref="loadMoreRef" class="load-trigger"></div>
+    </div> -->
+   <div class="recommend-section">
+  <router-link
+    v-for="item in products"
+    :key="item.id"
+    :to="`/product/${item.id}`"
+    class="product-card-link"
+  >
+    <div class="product-card">
+      <img :src="item.image" alt="商品图片" class="product-image" />
+
+      <div class="product-info">
+        <div class="product-name">{{ item.name }}</div>
+        <div class="product-brand">品牌：{{ item.brand || '未知品牌' }}</div>
+        <div class="product-desc">{{ item.description || '暂无商品介绍' }}</div>
+        <div class="product-sales">销量：{{ item.salesVolume ?? '未知' }}</div>
+        <div class="product-price">￥{{ item.price }}</div>
+      </div>
     </div>
+  </router-link>
+
+  <div v-if="loading" class="loading">加载中...</div>
+  <div v-if="finished" class="finished">已加载全部商品</div>
+  <div ref="loadMoreRef" class="load-trigger"></div>
+</div>
 
 
 
@@ -176,8 +211,12 @@ const fetchCategories = async () => {
 
 onMounted(fetchCategories)
 
+//点击分类跳转页面展示所有属于该分类的商品
 
 
+const goToCategory = (categoryId) => {
+  router.push({ path: '/category/products', query: { id: categoryId } })
+}
 
 
 const user = ref({})
@@ -224,7 +263,7 @@ const listProduct = async (params) => {
   const res = await axios.get('/api/product/product/recommend', { params })
 
   // 控制台打印看结构
-  // console.log('商品接口返回：', res.data)
+  // console.log('商品接口返回：', res.data.data)
 
   return res.data.data
 }
@@ -256,6 +295,9 @@ const loadProducts = async () => {
     loading.value = false
   }
 }
+
+
+
 
 
 
