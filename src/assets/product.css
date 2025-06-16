@@ -487,3 +487,14 @@
   font-weight: bold;
   color: #e60012;
 }
+
+.cart-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: #333;
+}
+.cart-btn:hover {
+  color: #007bff;
+}

@@ -73,9 +73,10 @@ const handleLogin = async () => {
     })
 
     console.log(res)
+    // alert(JSON.stringify(res.data.user))
+    // alert(res.data.token)
     const token = res.data.token
     const user = res.data.user
-
     // 保存 token 到本地（localStorage，也可以用 cookie）
     localStorage.setItem('token', 'Bearer ' + token)
     localStorage.setItem('user', JSON.stringify(user))

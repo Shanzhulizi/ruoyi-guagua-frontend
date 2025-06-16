@@ -176,4 +176,7 @@ onMounted(fetchProducts)
 .btn-home:hover {
   background-color: #66b1ff;
 }
+
+
+
 </style>

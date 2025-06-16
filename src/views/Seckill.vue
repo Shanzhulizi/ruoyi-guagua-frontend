@@ -38,9 +38,7 @@ async function fetchSeckillProducts() {
 const goBack = () => {
   router.back()
 }
-// function goToDetail(id) {
-//   router.push(`/seckill/detail/${id}`)
-// }
+
 
 const goToDetail = (productId) => {
 console.log('value:', products.value)

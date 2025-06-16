@@ -25,7 +25,14 @@
         <input type="text" placeholder="搜索商品" v-model="search" />
         <button @click="doSearch">搜索</button>
       </div>
-      <div class="search-right"></div>
+      <div class="search-right">
+ <button class="cart-btn" @click="goToCart" title="购物车">
+    🛒 购物车
+       <span class="cart-badge" v-if="cartCount > 0">{{ cartCount }}</span>
+  
+  </button>
+
+      </div>
     </div>
 
 
@@ -112,23 +119,7 @@
 
 
 
-    <!-- <div class="recommend-section">
-      <div class="product-card" v-for="item in products" :key="item.id">
-        <img :src="item.image" alt="商品图片" class="product-image" />
-       
-        <div class="product-info">
-          <div class="product-name">{{ item.name }}</div>
-          <div class="product-brand">品牌：{{ item.brand || '未知品牌' }}</div>
-          <div class="product-desc">{{ item.description || '暂无商品介绍' }}</div>
-          <div class="product-sales">销量：{{ item.salesVolume ?? '未知' }}</div>
-          <div class="product-price">￥{{ item.price }}</div>
-        </div>
-      </div>
-
-      <div v-if="loading" class="loading">加载中...</div>
-      <div v-if="finished" class="finished">已加载全部商品</div>
-      <div ref="loadMoreRef" class="load-trigger"></div>
-    </div> -->
+   
    <div class="recommend-section">
   <router-link
     v-for="item in products"
@@ -184,7 +175,27 @@ const doSearch = () => {
 import axios from 'axios'
 
 
+//购物车
 
+const cartCount = ref(0)
+
+const fetchCartCount = async () => {
+    const user = JSON.parse(localStorage.getItem('user'))
+    if (!user || !user.id) return
+
+    const res = await axios.get(`/api/cart/count?userId=${user.id}`)
+    if (res.data.code === 200) {
+        cartCount.value = res.data.data
+    }
+}
+
+onMounted(() => {
+    fetchCartCount()
+})
+
+const goToCart = () => {
+  router.push('/cart')  // 这里改成你购物车页面的路由路径
+}
 
 
 const groupedCategories = ref({})
