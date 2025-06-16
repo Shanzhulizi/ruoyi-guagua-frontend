@@ -1,13 +1,9 @@
 <template>
   <div class="seckill-container">
+        <button class="back-btn" @click="goBack">← 返回</button>
     <h2>秒杀商品</h2>
     <div class="product-grid">
-      <div
-        v-for="item in products"
-        :key="item.id"
-        class="product-card"
-        @click="goToDetail(item.id)"
-      >
+      <div v-for="item in products" :key="item.id" class="product-card" @click="goToDetail(item.productId)">
         <img :src="item.image" alt="商品图" class="product-image" />
         <h3 class="product-name">{{ item.name }}</h3>
         <div class="price">
@@ -39,9 +35,18 @@ async function fetchSeckillProducts() {
     console.error('请求秒杀商品失败', error)
   }
 }
+const goBack = () => {
+  router.back()
+}
+// function goToDetail(id) {
+//   router.push(`/seckill/detail/${id}`)
+// }
 
-function goToDetail(id) {
-  router.push(`/seckill/detail/${id}`)
+const goToDetail = (productId) => {
+console.log('value:', products.value)
+
+  console.log('跳转商品id:', productId)
+  router.push(`/product/${productId}`)
 }
 
 onMounted(() => {

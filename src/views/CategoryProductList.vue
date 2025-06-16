@@ -1,9 +1,16 @@
 <template>
   <div class="product-list-container">
     <h2 class="title">分类 {{ categoryId }} 的商品</h2>
-   <button @click="goHome" class="btn-home">返回主页</button>
+    <button @click="goHome" class="btn-home">返回主页</button>
+
     <ul class="product-list">
-      <li v-for="product in productList" :key="product.id" class="product-card">
+      <li
+        v-for="product in productList"
+        :key="product.id"
+        class="product-card"
+        @click="goToDetail(product.id)"
+        style="cursor: pointer"
+      >
         <img :src="product.image" alt="商品图片" class="product-image" />
         <div class="product-info">
           <h3 class="product-name">{{ product.name }}</h3>
@@ -19,16 +26,16 @@
   </div>
 </template>
 
+
 <script setup>
 import { onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 
-import { useRouter } from 'vue-router'
 const route = useRoute()
-const categoryId = ref(route.query.id || '')
-
 const router = useRouter()
+
+const categoryId = ref(route.query.id || '')
 const productList = ref([])
 
 const fetchProducts = async () => {
@@ -42,12 +49,17 @@ const fetchProducts = async () => {
   }
 }
 
-onMounted(fetchProducts)
-
 const goHome = () => {
   router.push('/home')
 }
+
+const goToDetail = (productId) => {
+  router.push(`/product/${productId}`)
+}
+
+onMounted(fetchProducts)
 </script>
+
 
 <style scoped>
 .product-list-container {

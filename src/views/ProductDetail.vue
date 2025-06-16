@@ -1,26 +1,52 @@
 <template>
-    <div class="product-detail" v-if="product">
-        <button class="back-btn" @click="goBack">← 返回</button>
+  <div class="product-detail" v-if="product">
+    <button class="back-btn" @click="goBack">← 返回</button>
 
-        <div class="product-container">
-            <img :src="product.image || defaultImage" class="product-image" @error="onImageError" />
+    <div class="product-container">
+      <img :src="product.image || defaultImage" class="product-image" @error="onImageError" />
 
-            <div class="product-info">
-                <h1 class="product-name">{{ product.name }}</h1>
-                <p class="product-brand">品牌：{{ product.brand || '未知品牌' }}</p>
-                <p class="product-desc">介绍：{{ product.description || '暂无介绍' }}</p>
-                <p class="product-sales">销量：{{ product.salesVolume ?? '未知' }}</p>
-                <p class="product-price">价格：￥{{ product.price }}</p>
-
-                <div class="btn-group">
-                    <button class="buy-btn" @click="buyNow">立即购买</button>
-                    <button class="cart-btn" @click="addToCart">加入购物车</button>
-                </div>
-            </div>
+      <div class="product-info">
+        <!-- 秒杀横幅 -->
+        <div v-if="product.isSeckill" class="seckill-banner">
+          🐸 呱呱秒杀进行中！限时优惠，不容错过！
         </div>
-    </div>
 
-    <div v-else class="loading">加载中...</div>
+        <h1 class="product-name">{{ product.name }}</h1>
+        <p class="product-brand">品牌：{{ product.brand || '未知品牌' }}</p>
+        <p class="product-desc">介绍：{{ product.description || '暂无介绍' }}</p>
+        <p class="product-sales">销量：{{ product.salesVolume ?? '未知' }}</p>
+
+        <!-- 秒杀价展示 -->
+        <p class="product-price">
+          <template v-if="product.isSeckill">
+            原价：<del>￥{{ product.originalPrice }}</del><br>
+            秒杀价：<strong class="seckill-price">￥{{ product.seckillPrice }}</strong>
+          </template>
+          <template v-else>
+            价格：￥{{ product.price }}
+          </template>
+        </p>
+
+        <div class="btn-group">
+          <button
+            class="buy-btn"
+            @click="product.isSeckill ? seckillBuy() : buyNow()"
+          >
+            {{ product.isSeckill ? '立即秒杀' : '立即购买' }}
+          </button>
+          <button
+            class="cart-btn"
+            v-if="!product.isSeckill"
+            @click="addToCart"
+          >
+            加入购物车
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div v-else class="loading">加载中...</div>
 </template>
 
 <script setup>
@@ -36,22 +62,21 @@ const product = ref(null)
 const defaultImage = 'https://via.placeholder.com/400x300?text=无图'
 
 const fetchProductDetail = async () => {
-    try {
-        const res = await axios.get(`/api/product/product/${productId}`)
-        product.value = res.data.data
-    } catch (e) {
-        console.error('加载商品失败', e)
-    }
+  try {
+    const res = await axios.get(`/api/product/product/${productId}`)
+    product.value = res.data.data
+  } catch (e) {
+    console.error('加载商品失败', e)
+  }
 }
 
 const goBack = () => {
-    router.back()
+  router.back()
 }
 
 const onImageError = (e) => {
-    e.target.src = defaultImage
+  e.target.src = defaultImage
 }
-
 
 const addToCart = async () => {
   try {
@@ -71,15 +96,36 @@ const addToCart = async () => {
 }
 
 const buyNow = () => {
-  // 示例：跳转到结算页或提交立即购买逻辑
-  alert(`立即购买：商品 ID ${product.value.id}，后续可跳转结算页`)
-  // router.push(`/order/checkout?productId=${product.value.id}&quantity=1`)
+  alert(`立即购买：商品 ID ${product.value.id}`)
 }
 
-
+const seckillBuy = () => {
+  alert(`立即秒杀：商品 ID ${product.value.id}`)
+  // 可跳转秒杀下单页面，如：router.push(`/seckill/checkout/${product.value.id}`)
+}
 
 onMounted(fetchProductDetail)
 </script>
+
+<style scoped>
+.seckill-banner {
+  background-color: #ffefcc;
+  color: #d35400;
+  font-weight: bold;
+  padding: 8px 12px;
+  border: 2px dashed #d35400;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.seckill-price {
+  color: red;
+  font-size: 20px;
+  font-weight: bold;
+}
+</style>
+
 
 <style scoped>
 .product-detail {
