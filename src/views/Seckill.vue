@@ -1,6 +1,6 @@
 <template>
   <div class="seckill-container">
-        <button class="back-btn" @click="goBack">← 返回</button>
+    <button class="back-btn" @click="goBack">← 返回</button>
     <h2>秒杀商品</h2>
     <div class="product-grid">
       <div v-for="item in products" :key="item.id" class="product-card" @click="goToDetail(item.productId)">
@@ -41,10 +41,11 @@ const goBack = () => {
 
 
 const goToDetail = (productId) => {
-console.log('value:', products.value)
+  console.log('value:', products.value)
 
   console.log('跳转商品id:', productId)
-  router.push(`/product/${productId}`)
+  // router.push(`/product/${productId}`)
+  router.push(`/product/${productId}?seckill=true`)
 }
 
 onMounted(() => {

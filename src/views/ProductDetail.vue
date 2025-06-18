@@ -1,52 +1,66 @@
 <template>
-    <div class="cart-icon-wrapper" @click="goToCart">
-        🛒
-        <span class="cart-badge" v-if="cartCount > 0">{{ cartCount }}</span>
+  <div class="container">
+    <!-- 购物车图标 -->
+    <div class="cart-icon-wrapper" @click="goToCart" title="购物车">
+      <svg class="cart-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path
+          d="M7 18c-1.104 0-2 .896-2 2s.896 2 2 2 2-.896 2-2-.896-2-2-2zm10 0c-1.104 0-2 .896-2 2s.896 2 2 2 2-.896 2-2-.896-2-2-2zM7.218 12h8.063c.546 0 1.048-.343 1.236-.852l3.163-7.808-1.785-.723-3.117 7.693H7.217L5 4H2v2h2l3.6 7.59-1.35 2.44C5.17 16.49 5 16.75 5 17c0 1.104.896 2 2 2h12v-2H7.218z"
+        />
+      </svg>
+      <span v-if="cartCount > 0" class="cart-badge">{{ cartCount }}</span>
     </div>
 
+    <!-- 商品详情卡片 -->
+    <div class="product-card" v-if="product">
+      <button class="btn-back" @click="goBack">← 返回</button>
 
-    <div class="product-detail" v-if="product">
-        <button class="back-btn" @click="goBack">← 返回</button>
-
-        <div class="product-container">
-            <img :src="product.image || defaultImage" class="product-image" @error="onImageError" />
-
-            <div class="product-info">
-                <!-- 秒杀横幅 -->
-                <div v-if="product.isSeckill" class="seckill-banner">
-                    🐸 呱呱秒杀进行中！限时优惠，不容错过！
-                </div>
-
-                <h1 class="product-name">{{ product.name }}</h1>
-                <p class="product-brand">品牌：{{ product.brand || '未知品牌' }}</p>
-                <p class="product-desc">介绍：{{ product.description || '暂无介绍' }}</p>
-                <p class="product-sales">销量：{{ product.salesVolume ?? '未知' }}</p>
-
-                <!-- 秒杀价展示 -->
-                <p class="product-price">
-                    <template v-if="product.isSeckill">
-                        原价：<del>￥{{ product.originalPrice }}</del><br>
-                        秒杀价：<strong class="seckill-price">￥{{ product.seckillPrice }}</strong>
-                    </template>
-                    <template v-else>
-                        价格：￥{{ product.price }}
-                    </template>
-                </p>
-
-                <div class="btn-group">
-                    <button class="buy-btn" @click="product.isSeckill ? seckillBuy() : buyNow()">
-                        {{ product.isSeckill ? '立即秒杀' : '立即购买' }}
-                    </button>
-                    <button class="cart-btn" v-if="!product.isSeckill" @click="addToCart">
-                        加入购物车
-                    </button>
-                </div>
-            </div>
+      <div class="content-wrapper">
+        <div class="image-wrapper">
+          <img
+            :src="product.image || defaultImage"
+            alt="商品图片"
+            @error="onImageError"
+            class="product-image"
+          />
+          <span v-if="isSeckill" class="badge-seckill">秒杀</span>
         </div>
+
+        <div class="info-wrapper">
+          <h2 class="product-name">{{ product.name }}</h2>
+          <p class="product-brand">品牌：{{ product.brand || "未知品牌" }}</p>
+          <p class="product-desc">{{ product.description || "暂无介绍" }}</p>
+          <p class="product-sales">销量：{{ product.salesVolume ?? "未知" }}</p>
+
+          <div class="price-wrapper">
+            <div class="original-price" v-if="isSeckill">
+              ￥{{ product.originalPrice }}
+            </div>
+            <div class="final-price">
+              ￥
+              <strong>{{ isSeckill ? product.seckillPrice : product.price }}</strong>
+            </div>
+          </div>
+
+          <div class="button-group">
+            <button class="btn-primary" @click="isSeckill ? seckillBuy() : buyNow()">
+              {{ isSeckill ? "立即秒杀" : "立即购买" }}
+            </button>
+            <button
+            
+              class="btn-secondary"
+              @click="addToCart"
+            >
+              加入购物车
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div v-else class="loading">加载中...</div>
+  </div>
 </template>
+
 
 <script setup>
 import { ref, onMounted } from 'vue'
@@ -58,259 +72,328 @@ const router = useRouter()
 const productId = route.params.id
 
 const product = ref(null)
+const isSeckill = ref(false)
 const defaultImage = 'https://via.placeholder.com/400x300?text=无图'
 
+const cartCount = ref(0)
+
+const getUser = () => {
+  try {
+    const user = JSON.parse(localStorage.getItem('user'))
+    return user && user.id ? user : null
+  } catch {
+    return null
+  }
+}
+
 const fetchProductDetail = async () => {
-    try {
-        const res = await axios.get(`/api/product/product/${productId}`)
-        product.value = res.data.data
-    } catch (e) {
-        console.error('加载商品失败', e)
+  try {
+    isSeckill.value = route.query.seckill === 'true'
+    const url = isSeckill.value
+      ? `/api/seckill/seckill/detail/${productId}`
+      : `/api/product/product/${productId}`
+    const res = await axios.get(url)
+    if (res.data.code === 200 || res.data.data) {
+      product.value = res.data.data || res.data
+    } else {
+      console.error('获取商品详情失败:', res.data.msg)
     }
+  } catch (e) {
+    console.error('加载商品失败', e)
+  }
 }
 
-const goBack = () => {
-    router.back()
-}
-
-const onImageError = (e) => {
-    e.target.src = defaultImage
+const fetchCartCount = async () => {
+  const user = getUser()
+  if (!user) {
+    cartCount.value = 0
+    return
+  }
+  try {
+    const res = await axios.get(`/api/cart/count?userId=${user.id}`)
+    if (res.data.code === 200) {
+      cartCount.value = res.data.data
+    }
+  } catch (e) {
+    console.error('获取购物车数量失败', e)
+  }
 }
 
 const addToCart = async () => {
-    try {
-        const user = JSON.parse(localStorage.getItem('user'))
-        // alert(user.id)
-        if (!user || !user.id) {
-            alert('请先登录')
-            return
-        }
-
-
-        const res = await axios.post('/api/cart/add', {
-            userId: user.id,               // 从本地存储中获取 userId
-            productId: product.value.id,
-            quantity: 1
-        })
-
-        if (res.data.code === 200) {
-            //   alert('已加入购物车')
-            cartCount.value += 1
-        } else {
-            alert(res.data.msg || '加入购物车失败')
-        }
-    } catch (e) {
-        console.error('加入购物车出错', e)
-        alert('加入购物车失败')
+  const user = getUser()
+  if (!user) {
+    alert('请先登录')
+    router.push('/login')
+    return
+  }
+  try {
+    const res = await axios.post('/api/cart/add', {
+      userId: user.id,
+      productId: product.value.id,
+      quantity: 1,
+    })
+    if (res.data.code === 200) {
+      cartCount.value += 1
+      alert('已加入购物车')
+    } else {
+      alert(res.data.msg || '加入购物车失败')
     }
+  } catch (e) {
+    console.error('加入购物车出错', e)
+    alert('加入购物车失败')
+  }
 }
 
-
 const buyNow = () => {
-    alert(`立即购买：商品 ID ${product.value.id}`)
+  if (!getUser()) {
+    alert('请先登录')
+    router.push('/login')
+    return
+  }
+  alert(`立即购买：商品 ID ${product.value.id}`)
+  // TODO: 跳转到购买流程页面
 }
 
 const seckillBuy = () => {
-    alert(`立即秒杀：商品 ID ${product.value.id}`)
-    // 可跳转秒杀下单页面，如：router.push(`/seckill/checkout/${product.value.id}`)
+  if (!getUser()) {
+    alert('请先登录')
+    router.push('/login')
+    return
+  }
+  alert(`立即秒杀：商品 ID ${product.value.id}`)
+  // TODO: 跳转秒杀下单页面
 }
 
-onMounted(fetchProductDetail)
-
-
-
-
-/////////////////////////////////////////////////
-const cartCount = ref(0)
-
-const fetchCartCount = async () => {
-    const user = JSON.parse(localStorage.getItem('user'))
-    if (!user || !user.id) return
-
-    const res = await axios.get(`/api/cart/count?userId=${user.id}`)
-    if (res.data.code === 200) {
-        cartCount.value = res.data.data
-    }
+const goBack = () => {
+  router.back()
 }
 
-onMounted(() => {
-    fetchProductDetail()
-    fetchCartCount()
-})
-
+const onImageError = (e) => {
+  e.target.src = defaultImage
+}
 
 const goToCart = () => {
-    router.push('/cart') // 假设你有这个路由页面
+  router.push('/cart')
 }
 
+onMounted(async () => {
+  await fetchProductDetail()
+  await fetchCartCount()
+})
 </script>
 
-<style scoped>
-.seckill-banner {
-    background-color: #ffefcc;
-    color: #d35400;
-    font-weight: bold;
-    padding: 8px 12px;
-    border: 2px dashed #d35400;
-    border-radius: 8px;
-    margin-bottom: 12px;
-    text-align: center;
-}
-
-.seckill-price {
-    color: red;
-    font-size: 20px;
-    font-weight: bold;
-}
-</style>
-
 
 <style scoped>
-.product-detail {
-    padding: 20px;
+
+
+/* 容器 */
+.container {
+  max-width: 720px;
+  margin: 24px auto;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+  position: relative;
+  padding: 0 16px;
 }
 
-.back-btn {
-    margin-bottom: 20px;
-    padding: 6px 12px;
-    background-color: #eee;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.product-container {
-    display: flex;
-    gap: 30px;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
-}
-
-.product-image {
-    width: 400px;
-    height: 300px;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 1px solid #eee;
-}
-
-.product-info {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    font-size: 16px;
-}
-
-.product-name {
-    font-size: 24px;
-    font-weight: bold;
-}
-
-.product-price {
-    color: #e33;
-    font-weight: bold;
-    font-size: 20px;
-}
-
-.buy-btn {
-    margin-top: 20px;
-    background-color: #ff4d4f;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-}
-
-.buy-btn:hover {
-    background-color: #ff7875;
-}
-
-.loading {
-    text-align: center;
-    margin-top: 50px;
-    font-size: 18px;
-    color: #666;
-}
-
-.btn-group {
-    display: flex;
-    gap: 12px;
-    margin-top: 20px;
-}
-
-.buy-btn,
-.cart-btn {
-    padding: 10px 16px;
-    font-size: 16px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.buy-btn {
-    background-color: #ff4d4f;
-    color: white;
-}
-
-.cart-btn {
-    background-color: #1890ff;
-    color: white;
-}
-
-.cart-btn:hover {
-    background-color: #40a9ff;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-/* ******************************************** */
+/* 购物车图标 */
 .cart-icon-wrapper {
   position: fixed;
   top: 20px;
   right: 20px;
   cursor: pointer;
-  width: 40px;     /* 整个容器宽度 */
-  height: 40px;    /* 高度 */
-  display: inline-block;
-  font-size: 32px; /* 图标大小 */
+  width: 42px;
+  height: 42px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.15);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  color: #555;
+  transition: color 0.3s ease;
 }
-
+.cart-icon-wrapper:hover {
+  color: #007aff;
+}
 .cart-icon {
-  width: 100%;
-  height: 100%;
-  display: block;
+  width: 24px;
+  height: 24px;
 }
-
 .cart-badge {
   position: absolute;
-  top: -6px;
-  right: -6px;
-  background-color: red;
+  top: 4px;
+  right: 4px;
+  background: #ff3b30;
   color: white;
-  border-radius: 50%;
-  padding: 5px 9px;
-  font-size: 16px;
-  font-weight: bold;
-  min-width: 26px;
-  text-align: center;
-  line-height: 1;
-  user-select: none;
-  pointer-events: none;
-  box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-weight: 600;
 }
 
+/* 商品卡片 */
+.product-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgb(0 0 0 / 0.1);
+  overflow: hidden;
+  padding: 24px;
+}
+
+/* 返回按钮 */
+.btn-back {
+  background: none;
+  border: none;
+  font-size: 16px;
+  margin-bottom: 20px;
+  color: #666;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.3s;
+}
+.btn-back:hover {
+  color: #007aff;
+}
+
+/* 内容区：左右布局 */
+.content-wrapper {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+/* 图片部分 */
+.image-wrapper {
+  position: relative;
+  flex: 1 1 280px;
+  max-width: 280px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgb(0 0 0 / 0.08);
+}
+
+.product-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+/* 秒杀徽章 */
+.badge-seckill {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background-color: #ff453a;
+  color: white;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 14px;
+  user-select: none;
+  box-shadow: 0 0 8px #ff453aaa;
+}
+
+/* 信息部分 */
+.info-wrapper {
+  flex: 1 1 360px;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-name {
+  font-weight: 700;
+  font-size: 24px;
+  margin: 0 0 12px 0;
+  line-height: 1.3;
+  color: #222;
+}
+
+.product-brand,
+.product-desc,
+.product-sales {
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: #555;
+  line-height: 1.5;
+}
+
+/* 价格区 */
+.price-wrapper {
+  margin: 20px 0;
+  display: flex;
+  align-items: baseline;
+  gap: 20px;
+}
+
+.original-price {
+  font-size: 18px;
+  text-decoration: line-through;
+  color: #999;
+}
+
+.final-price {
+  font-size: 28px;
+  font-weight: 800;
+  color: #ff453a;
+}
+
+/* 按钮组 */
+.button-group {
+  display: flex;
+  gap: 16px;
+  margin-top: auto;
+}
+
+.btn-primary,
+.btn-secondary {
+  flex: 1;
+  padding: 14px 0;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.3s ease;
+  user-select: none;
+}
+
+.btn-primary {
+  background: linear-gradient(90deg, #007aff, #0051a8);
+  color: white;
+}
+.btn-primary:hover {
+  background: linear-gradient(90deg, #0051a8, #003d7a);
+}
+
+.btn-secondary {
+  background: #e1e4e8;
+  color: #444;
+}
+.btn-secondary:hover {
+  background: #cfd3d8;
+}
+
+/* 加载中 */
+.loading {
+  text-align: center;
+  font-size: 20px;
+  padding: 80px 0;
+  color: #777;
+}
+
+/* 响应式 */
+@media (max-width: 680px) {
+  .content-wrapper {
+    flex-direction: column;
+  }
+
+  .image-wrapper,
+  .info-wrapper {
+    max-width: 100%;
+  }
+}
 
 </style>
