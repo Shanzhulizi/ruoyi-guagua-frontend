@@ -7,6 +7,7 @@ import Seckill from "../views/Seckill.vue";
 import CategoryProductList from "../views/CategoryProductList.vue";
 import ProductDetail from "../views/ProductDetail.vue";
 import CartPage from "../views/CartPage.vue";
+import SearchResult from "../views/SearchResult.vue";
 const routes = [
   { path: "/", redirect: "/login" },
   { path: "/login", component: Login },
@@ -21,7 +22,8 @@ const routes = [
 
   { path: "/product/:id", component: ProductDetail },
 
-{ path: "/cart", component: CartPage },
+  { path: "/cart", component: CartPage },
+  { path: "/search", component: SearchResult },
 ];
 
 const router = createRouter({

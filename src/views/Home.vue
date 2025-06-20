@@ -22,15 +22,20 @@
         <span class="logo-text">呱呱</span>
       </div>
       <div class="search-input-group">
-        <input type="text" placeholder="搜索商品" v-model="search" />
-        <button @click="doSearch">搜索</button>
+         <input
+      v-model="keyword"
+      placeholder="请输入商品关键词"
+      @keyup.enter="doSearch"
+    />
+    <button @click="doSearch">搜索</button>
       </div>
+
       <div class="search-right">
- <button class="cart-btn" @click="goToCart" title="购物车">
-    🛒 购物车
-       <span class="cart-badge" v-if="cartCount > 0">{{ cartCount }}</span>
-  
-  </button>
+        <button class="cart-btn" @click="goToCart" title="购物车">
+          🛒 购物车
+          <span class="cart-badge" v-if="cartCount > 0">{{ cartCount }}</span>
+
+        </button>
 
       </div>
     </div>
@@ -119,31 +124,26 @@
 
 
 
-   
-   <div class="recommend-section">
-  <router-link
-    v-for="item in products"
-    :key="item.id"
-    :to="`/product/${item.id}`"
-    class="product-card-link"
-  >
-    <div class="product-card">
-      <img :src="item.image" alt="商品图片" class="product-image" />
 
-      <div class="product-info">
-        <div class="product-name">{{ item.name }}</div>
-        <div class="product-brand">品牌：{{ item.brand || '未知品牌' }}</div>
-        <div class="product-desc">{{ item.description || '暂无商品介绍' }}</div>
-        <div class="product-sales">销量：{{ item.salesVolume ?? '未知' }}</div>
-        <div class="product-price">￥{{ item.price }}</div>
-      </div>
+    <div class="recommend-section">
+      <router-link v-for="item in products" :key="item.id" :to="`/product/${item.id}`" class="product-card-link">
+        <div class="product-card">
+          <img :src="item.image" alt="商品图片" class="product-image" />
+
+          <div class="product-info">
+            <div class="product-name">{{ item.name }}</div>
+            <div class="product-brand">品牌：{{ item.brand || '未知品牌' }}</div>
+            <div class="product-desc">{{ item.description || '暂无商品介绍' }}</div>
+            <div class="product-sales">销量：{{ item.salesVolume ?? '未知' }}</div>
+            <div class="product-price">￥{{ item.price }}</div>
+          </div>
+        </div>
+      </router-link>
+
+      <div v-if="loading" class="loading">加载中...</div>
+      <div v-if="finished" class="finished">已加载全部商品</div>
+      <div ref="loadMoreRef" class="load-trigger"></div>
     </div>
-  </router-link>
-
-  <div v-if="loading" class="loading">加载中...</div>
-  <div v-if="finished" class="finished">已加载全部商品</div>
-  <div ref="loadMoreRef" class="load-trigger"></div>
-</div>
 
 
 
@@ -163,12 +163,17 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 
-const search = ref('');
 
+
+const keyword = ref('')
 
 const doSearch = () => {
-  alert(`搜索：${search.value}`);
-};
+  if (!keyword.value.trim()) return
+  router.push({
+    path: '/search',
+    query: { keyword: keyword.value }
+  })
+}
 
 // 左侧商品种类
 // import { ref, onMounted } from 'vue'
@@ -180,17 +185,17 @@ import axios from 'axios'
 const cartCount = ref(0)
 
 const fetchCartCount = async () => {
-    const user = JSON.parse(localStorage.getItem('user'))
-    if (!user || !user.id) return
+  const user = JSON.parse(localStorage.getItem('user'))
+  if (!user || !user.id) return
 
-    const res = await axios.get(`/api/cart/count?userId=${user.id}`)
-    if (res.data.code === 200) {
-        cartCount.value = res.data.data
-    }
+  const res = await axios.get(`/api/cart/count?userId=${user.id}`)
+  if (res.data.code === 200) {
+    cartCount.value = res.data.data
+  }
 }
 
 onMounted(() => {
-    fetchCartCount()
+  fetchCartCount()
 })
 
 const goToCart = () => {
