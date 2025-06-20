@@ -72,6 +72,12 @@ const handleLogin = async () => {
       uuid: uuid.value
     })
 
+    
+    if (res.data.code !== 200) {
+      alert(res.data.msg || '登录失败')
+      await getCaptcha()
+      return
+    }
     console.log(res)
     // alert(JSON.stringify(res.data.user))
     // alert(res.data.token)
